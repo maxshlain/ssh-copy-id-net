@@ -42,9 +42,7 @@ publish_for_runtime() {
         --self-contained true \
         --output "$output_subdir" \
         --verbosity minimal \
-        -p:PublishSingleFile=true \
-        -p:PublishTrimmed=true \
-        -p:TrimMode=link
+        -p:PublishSingleFile=true
     
     if [ $? -eq 0 ]; then
         echo "✅ Successfully published for $runtime"
