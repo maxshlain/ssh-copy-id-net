@@ -64,4 +64,6 @@ catch (Exception ex)
     {
         Console.WriteLine("Please check the host and port configuration.");
     }
+
+    Console.WriteLine(ex);
 }
