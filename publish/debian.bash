@@ -77,7 +77,8 @@ create_debian_package() {
             --self-contained true \
             --output "dist/linux/$runtime" \
             --verbosity minimal \
-            -p:PublishSingleFile=true
+            -p:PublishSingleFile=true \
+            -p:PublishTrimmed=true
         
         chmod +x "$binary_source"
     fi

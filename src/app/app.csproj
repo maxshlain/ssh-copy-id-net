@@ -5,11 +5,17 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.1.0</Version>
+    <Version>0.1.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="SSH.NET" Version="2023.0.1" />
+  </ItemGroup>
+
+  <!-- Trimming configuration to preserve SSH.NET -->
+  <ItemGroup>
+    <TrimmerRootAssembly Include="Renci.SshNet" />
+    <TrimmerRootAssembly Include="SshNet.Security.Cryptography" />
   </ItemGroup>
 
 </Project>

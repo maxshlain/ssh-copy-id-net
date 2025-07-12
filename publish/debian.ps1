@@ -99,7 +99,8 @@ function New-DebianPackage {
             --self-contained true `
             --output $OutputDir `
             --verbosity minimal `
-            -p:PublishSingleFile=true
+            -p:PublishSingleFile=true `
+            -p:PublishTrimmed=true
         
         if ($LASTEXITCODE -ne 0) {
             throw "Failed to build $Runtime binary"

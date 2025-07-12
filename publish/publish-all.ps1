@@ -110,7 +110,8 @@ function Publish-ForRuntime {
             --self-contained true `
             --output $OutputSubDir `
             --verbosity minimal `
-            -p:PublishSingleFile=true
+            -p:PublishSingleFile=true `
+            -p:PublishTrimmed=true
         
         if ($LASTEXITCODE -eq 0) {
             Write-Host "✅ Successfully published $Platform for $Runtime" -ForegroundColor Green
