@@ -1,0 +1,190 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v1.0.0, v2.1.3, etc.
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }} (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          # Windows builds
+          - os: windows
+            arch: x64
+            runner: windows-latest
+            runtime: win-x64
+            executable_name: ssh-copy-id-net.exe
+          - os: windows
+            arch: arm64
+            runner: windows-latest
+            runtime: win-arm64
+            executable_name: ssh-copy-id-net.exe
+          # macOS builds
+          - os: macos
+            arch: x64
+            runner: macos-latest
+            runtime: osx-x64
+            executable_name: ssh-copy-id-net
+          - os: macos
+            arch: arm64
+            runner: macos-latest
+            runtime: osx-arm64
+            executable_name: ssh-copy-id-net
+          # Linux builds
+          - os: linux
+            arch: x64
+            runner: ubuntu-latest
+            runtime: linux-x64
+            executable_name: ssh-copy-id-net
+          - os: linux
+            arch: arm64
+            runner: ubuntu-latest
+            runtime: linux-arm64
+            executable_name: ssh-copy-id-net
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          else
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+
+      - name: Update project version
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.version.outputs.VERSION }}<\/Version>/" src/app/app.csproj
+          else
+            sed -i.bak "s/<Version>.*<\/Version>/<Version>${{ steps.version.outputs.VERSION }}<\/Version>/" src/app/app.csproj
+          fi
+        shell: bash
+
+      - name: Restore dependencies
+        run: dotnet restore src/app/app.csproj
+
+      - name: Build and publish
+        run: |
+          dotnet publish src/app/app.csproj \
+            --configuration Release \
+            --runtime ${{ matrix.runtime }} \
+            --self-contained true \
+            --output ./dist/${{ matrix.os }}/${{ matrix.runtime }} \
+            /p:PublishSingleFile=true \
+            /p:PublishTrimmed=true \
+            /p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Rename executable (non-Windows)
+        if: matrix.os != 'windows'
+        run: |
+          mv ./dist/${{ matrix.os }}/${{ matrix.runtime }}/app ./dist/${{ matrix.os }}/${{ matrix.runtime }}/${{ matrix.executable_name }}
+
+      - name: Rename executable (Windows)
+        if: matrix.os == 'windows'
+        run: |
+          Move-Item -Path "./dist/${{ matrix.os }}/${{ matrix.runtime }}/app.exe" -Destination "./dist/${{ matrix.os }}/${{ matrix.runtime }}/${{ matrix.executable_name }}"
+        shell: powershell
+
+      - name: Create archive
+        run: |
+          cd ./dist/${{ matrix.os }}/${{ matrix.runtime }}
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a ../../../ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-${{ matrix.runtime }}.zip ./*
+          else
+            tar -czf ../../../ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-${{ matrix.runtime }}.tar.gz ./*
+          fi
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ssh-copy-id-net-${{ matrix.runtime }}
+          path: |
+            ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-${{ matrix.runtime }}.*
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p ./release-assets
+          find ./artifacts -name "ssh-copy-id-net-*" -type f -exec cp {} ./release-assets/ \;
+          ls -la ./release-assets/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ steps.version.outputs.VERSION }}
+          body: |
+            ## ssh-copy-id-net v${{ steps.version.outputs.VERSION }}
+            
+            A cross-platform .NET implementation of the `ssh-copy-id` utility for copying SSH public keys to remote servers.
+            
+            ### Downloads
+            
+            Choose the appropriate binary for your platform:
+            
+            #### Windows
+            - **x64**: `ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-win-x64.zip` - Most Windows PCs and servers
+            - **ARM64**: `ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-win-arm64.zip` - Surface Pro X, ARM-based Windows devices
+            
+            #### macOS
+            - **x64**: `ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-osx-x64.tar.gz` - Intel-based Macs (2020 and earlier)
+            - **ARM64**: `ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-osx-arm64.tar.gz` - Apple Silicon Macs (M1, M2, M3, etc.)
+            
+            #### Linux
+            - **x64**: `ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz` - Most Linux servers and desktops
+            - **ARM64**: `ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-linux-arm64.tar.gz` - ARM-based Linux systems, Raspberry Pi 4+
+            
+            ### Usage
+            
+            ```bash
+            ssh-copy-id-net <host> <port> <username> <password> <public_key_file>
+            ```
+            
+            ### Installation
+            
+            1. Download the appropriate archive for your platform
+            2. Extract the archive
+            3. Make the executable available in your PATH (optional)
+            4. Run the tool with your SSH connection details
+            
+            For detailed usage instructions, see the [README](https://github.com/maxshlain/ssh-copy-id-net/blob/main/README.md).
+          files: ./release-assets/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

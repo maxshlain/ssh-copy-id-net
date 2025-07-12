@@ -24,7 +24,29 @@ This tool automates the process of copying your SSH public key to a remote serve
 
 ### Option 1: Download Pre-built Binary
 
-Check the [Releases](../../releases) page for pre-built binaries for your platform.
+Pre-built binaries are automatically created for all supported platforms when a new release is tagged. Check the [Releases](../../releases) page for the latest binaries.
+
+**Supported platforms:**
+- **Windows**: x64, ARM64 (`.zip` archives)
+- **macOS**: x64 (Intel), ARM64 (Apple Silicon) (`.tar.gz` archives)  
+- **Linux**: x64, ARM64 (`.tar.gz` archives)
+
+**Download and install:**
+1. Go to the [Releases](../../releases) page
+2. Download the appropriate archive for your platform
+3. Extract the archive to get the `ssh-copy-id-net` executable
+4. (Optional) Add the executable to your PATH for system-wide access
+
+**Quick install examples:**
+```bash
+# macOS/Linux - Extract and make executable
+tar -xzf ssh-copy-id-net-*-osx-arm64.tar.gz
+chmod +x ssh-copy-id-net
+sudo mv ssh-copy-id-net /usr/local/bin/
+
+# Windows - Extract from zip and optionally add to PATH
+# Extract ssh-copy-id-net.exe from the downloaded .zip file
+```
 
 ### Option 2: Build from Source
 
@@ -133,6 +155,18 @@ All build scripts create executables in the `dist/` directory:
 
 ## Usage
 
+### Using Pre-built Binary
+
+If you downloaded a pre-built binary from the releases:
+
+```bash
+ssh-copy-id-net <host> <port> <username> <password> <public_key_file>
+```
+
+### Using Development Build
+
+If you built from source:
+
 ```bash
 app <host> <port> <username> <password> <public_key_file>
 ```
@@ -147,6 +181,22 @@ app <host> <port> <username> <password> <public_key_file>
 
 ### Examples
 
+**Using pre-built binary:**
+```bash
+# Copy key to a server on standard SSH port
+ssh-copy-id-net example.com 22 user secretpass ~/.ssh/id_rsa.pub
+
+# Copy key to a server on custom port
+ssh-copy-id-net 192.168.1.100 2222 deploy mypass /home/user/.ssh/deploy_key.pub
+
+# Copy key to localhost for testing
+ssh-copy-id-net 127.0.0.1 22 admin password /Users/admin/.ssh/id_ed25519.pub
+
+# Windows example (using .exe extension)
+ssh-copy-id-net.exe example.com 22 user secretpass C:\Users\user\.ssh\id_rsa.pub
+```
+
+**Using development build:**
 ```bash
 # Copy key to a server on standard SSH port
 app example.com 22 user secretpass ~/.ssh/id_rsa.pub
@@ -301,6 +351,49 @@ The Debian package provides:
 - ✅ Proper Debian package metadata
 - ✅ Clean uninstallation support
 - ✅ Both x64 and ARM64 architecture support
+
+## Releases and CI/CD
+
+### Automated Releases
+
+This project uses GitHub Actions to automatically build and release cross-platform binaries whenever a new version tag is pushed.
+
+**Release Process:**
+1. Tag a new version: `git tag v1.2.3`
+2. Push the tag: `git push origin v1.2.3`
+3. GitHub Actions will automatically:
+   - Build binaries for all supported platforms
+   - Create release archives (.zip for Windows, .tar.gz for macOS/Linux)
+   - Create a GitHub release with all artifacts
+   - Generate release notes with download links
+
+**Supported Build Targets:**
+- **Windows**: win-x64, win-arm64
+- **macOS**: osx-x64 (Intel), osx-arm64 (Apple Silicon)
+- **Linux**: linux-x64, linux-arm64
+
+**Build Features:**
+- Self-contained executables (no .NET runtime required)
+- Single-file deployment
+- Trimmed binaries for smaller size
+- Cross-platform compatibility
+
+### Manual Building
+
+For development or custom builds, you can still use the PowerShell scripts in the `publish/` directory:
+
+```powershell
+# Build for all platforms
+./publish/publish-all.ps1 -All
+
+# Build for specific platforms
+./publish/publish-all.ps1 -Windows -MacOS
+
+# Platform-specific builds
+./publish/win.ps1     # Windows only
+./publish/mac.ps1     # macOS only  
+./publish/linux.ps1   # Linux only
+```
 
 ## Contributing
 
