@@ -52,6 +52,15 @@ public class SshApp(string host, int port, string username, string password, str
         {
             RunWithClient(client);
         }
+        
+        if (tester.CanLoginWithAnyInstalledKey())
+        {
+            Console.WriteLine("✓ SSH server is reachable with key-based authentication.");
+            Console.WriteLine(PrintBanner());
+            return;
+        }
+        
+        Console.WriteLine("✗ Failed to set up key-based authentication. Please check the logs above for details.");
     }
 
     private void RunWithClient(SshClient client)
@@ -87,7 +96,6 @@ public class SshApp(string host, int port, string username, string password, str
         commandText = "chmod 600 ~/.ssh/authorized_keys";
         ok = Execute(client, commandText, description);
         if (!ok) return;
-        Console.WriteLine(PrintBanner());
     }
 
     private static bool Execute(SshClient client, string commandText, string description)
