@@ -92,7 +92,21 @@ chmod +x publish/win.bash
 # Available on all platforms - build for any target
 ./publish/mac.ps1      # macOS executables
 ./publish/win.ps1      # Windows executables
+./publish/linux.ps1    # Linux executables
 ./publish/publish-all.ps1 -Linux  # Linux executables
+```
+
+**For Linux/Debian Developers:**
+```bash
+# Build Linux binaries
+./publish/linux.bash
+
+# Create Debian packages (.deb)
+./publish/debian.bash
+
+# PowerShell alternatives
+./publish/linux.ps1
+./publish/debian.ps1
 ```
 
 #### Output Locations
@@ -101,6 +115,7 @@ All build scripts create executables in the `dist/` directory:
 - **Windows**: `dist/windows/win-x64/app.exe`, `dist/windows/win-arm64/app.exe`
 - **macOS**: `dist/macos/osx-x64/app`, `dist/macos/osx-arm64/app` 
 - **Linux**: `dist/linux/linux-x64/app`, `dist/linux/linux-arm64/app`
+- **Debian**: `dist/debian/ssh-copy-id-net_1.0.0_amd64.deb`, `dist/debian/ssh-copy-id-net_1.0.0_arm64.deb`
 
 #### Runtime Identification
 
@@ -201,10 +216,13 @@ The application provides detailed error messages for common issues:
 ├── publish/                # Build scripts directory
 │   ├── mac.bash            # macOS standalone build script (Bash)
 │   ├── win.bash            # Windows standalone build script (Bash)
+│   ├── linux.bash          # Linux standalone build script (Bash)
 │   ├── mac.ps1             # macOS standalone build script (PowerShell)
 │   ├── win.ps1             # Windows standalone build script (PowerShell)
-│   ├── publish-all.ps1     # Cross-platform build script with flexible options
-│   └── README.md           # Publishing documentation
+│   ├── linux.ps1           # Linux standalone build script (PowerShell)
+│   ├── debian.bash         # Debian package builder (Bash)
+│   ├── debian.ps1          # Debian package builder (PowerShell)
+│   └── publish-all.ps1     # Cross-platform build script with flexible options
 └── src/
     └── app/
         ├── app.csproj           # Project file with dependencies
@@ -221,8 +239,8 @@ The `publish/` directory contains multiple build scripts to create standalone ex
 
 ### Available Scripts
 
-- **Bash Scripts** (macOS/Linux): `mac.bash`, `win.bash`
-- **PowerShell Scripts** (Cross-platform): `mac.ps1`, `win.ps1`, `publish-all.ps1`
+- **Bash Scripts** (macOS/Linux): `mac.bash`, `win.bash`, `linux.bash`, `debian.bash`
+- **PowerShell Scripts** (Cross-platform): `mac.ps1`, `win.ps1`, `linux.ps1`, `debian.ps1`, `publish-all.ps1`
 
 ### Script Features
 
@@ -244,6 +262,45 @@ The PowerShell scripts additionally offer:
 
 - .NET 8.0 SDK installed
 - PowerShell Core (for .ps1 scripts) - included with Windows, available for macOS/Linux
+- For Debian packages: `dpkg-dev` package on Linux systems
+
+## Debian Package Installation
+
+### Installing from .deb Package
+
+1. Build the Debian package:
+   ```bash
+   ./publish/debian.bash
+   ```
+
+2. Install the package:
+   ```bash
+   # For x64 systems
+   sudo dpkg -i dist/debian/ssh-copy-id-net_1.0.0_amd64.deb
+   
+   # For ARM64 systems  
+   sudo dpkg -i dist/debian/ssh-copy-id-net_1.0.0_arm64.deb
+   ```
+
+3. Use the installed command:
+   ```bash
+   ssh-copy-id-net example.com 22 user password ~/.ssh/id_rsa.pub
+   ```
+
+### Uninstalling
+
+```bash
+sudo dpkg -r ssh-copy-id-net
+```
+
+### Package Features
+
+The Debian package provides:
+- ✅ System-wide installation in `/usr/local/bin/`
+- ✅ Man page documentation (`man ssh-copy-id-net`)
+- ✅ Proper Debian package metadata
+- ✅ Clean uninstallation support
+- ✅ Both x64 and ARM64 architecture support
 
 ## Contributing
 
