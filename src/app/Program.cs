@@ -10,7 +10,8 @@ SshApp app = new SshApp(
     host: connectionArgs.Host,
     port: connectionArgs.Port,
     username: connectionArgs.Username,
-    password: connectionArgs.Password
+    password: connectionArgs.Password,
+    publicKeyFile: connectionArgs.PublicKeyFile
 );
 
 app.Run();
