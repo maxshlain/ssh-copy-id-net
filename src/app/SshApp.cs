@@ -51,36 +51,46 @@ public class SshApp(string host, int port, string username, string password, str
 
         Console.WriteLine("✓ Successfully connected to SSH server!");
 
-        var ok = Execute(client, "pwd");
+        // string description = $"read current working directory";
+        // var ok = Execute(client, "pwd", description);
+        // if (!ok) return;
+        
+        var description = "create remote .ssh directory if it doesn't exist...";
+        var commandText = "mkdir -p ~/.ssh";
+        var ok = Execute(client, commandText, description);
         if (!ok) return;
         
-        // create remote .ssh directory if it doesn't exist
-        ok = Execute(client, "mkdir -p ~/.ssh");
+        description = "set correct permissions for .ssh directory...";
+        commandText = "chmod 700 ~/.ssh";
+        ok = Execute(client, commandText, description);
         if (!ok) return;
         
-        // make sure remote .ssh directory has correct permissions
-        ok = Execute(client, "chmod 700 ~/.ssh");
-        if (!ok) return;
-        
-        // copy public key to remote .ssh directory
+        description = "copy public key to remote .ssh directory...\"";
         string publicKeyContent = File.ReadAllText(publicKeyFile).Trim();
-        string commandText = $"echo \"{publicKeyContent}\" >> ~/.ssh/authorized_keys";
-        ok = Execute(client, commandText);
+        commandText = $"echo \"{publicKeyContent}\" >> ~/.ssh/authorized_keys";
+        ok = Execute(client, commandText, description);
         if (!ok) return;
         
-        // set correct permissions for authorized_keys file
-        ok = Execute(client, "chmod 600 ~/.ssh/authorized_keys");
+        description = "set correct permissions for authorized_keys file...";
+        commandText = "chmod 600 ~/.ssh/authorized_keys";
+        ok = Execute(client, commandText, description);
         if (!ok) return;
     }
 
-    private static bool Execute(SshClient client, string commandText)
+    private static bool Execute(SshClient client, string commandText, string description)
     {
         SshCommand? command = client.CreateCommand(commandText);
         string? result = command.Execute();
 
         if (command.ExitStatus == 0)
         {
-            string message = "Command executed successfully:\n\t" + result.Trim();
+            string message = $" Successfully {description}";
+            string stdout = result?.Trim() ?? string.Empty;
+            if (!string.IsNullOrEmpty(stdout))
+            {
+                message += $"\nOutput: {stdout}";
+            }
+
             Console.WriteLine(message);
             return true;
         }
