@@ -2,7 +2,7 @@ using Renci.SshNet;
 
 namespace app;
 
-public class SshApp(string host, int port, string username, string password, string? publicKeyFile = null)
+public class SshApp(string host, int port, string username, string password, string publicKeyFile)
 {
     public void Run()
     {
@@ -72,35 +72,15 @@ public class SshApp(string host, int port, string username, string password, str
         {
             errorMessage += $"\nError: {command.Error.Trim()}";
         }
-        
+
         Console.WriteLine(errorMessage);
         return false;
     }
 
     private SshClient ComposeSshClient()
     {
-        List<AuthenticationMethod> authMethods = new List<AuthenticationMethod>();
-        
-        // Add password authentication
-        authMethods.Add(new PasswordAuthenticationMethod(username, password));
-        
-        // Add public key authentication if public key file is provided
-        if (!string.IsNullOrWhiteSpace(publicKeyFile))
-        {
-            try
-            {
-                var keyFile = new PrivateKeyFile(publicKeyFile, password);
-                authMethods.Add(new PrivateKeyAuthenticationMethod(username, keyFile));
-                Console.WriteLine($"Added public key authentication using: {publicKeyFile}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Warning: Failed to load public key file '{publicKeyFile}': {ex.Message}");
-                Console.WriteLine("Falling back to password authentication only.");
-            }
-        }
-        
-        var connectionInfo = new ConnectionInfo(host, port, username, authMethods.ToArray());
+        var method = new PasswordAuthenticationMethod(username, password);
+        var connectionInfo = new ConnectionInfo(host, port, username, method);
         return new SshClient(connectionInfo);
     }
 }
