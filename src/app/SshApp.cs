@@ -32,7 +32,14 @@ public class SshApp(string host, int port, string username, string password, str
 
     private void RunImpl()
     {
-        using (SshClient client = ComposeSshClient())
+        var tester = new ConnectionTester(host, port, username);
+        if (tester.CanLoginWithAnyInstalledKey())
+        {
+            Console.WriteLine("✓ SSH server is reachable with key-based authentication.");
+            return;
+        }
+        
+        using (SshClient client = ComposeSshClientWithPassword())
         {
             RunWithClient(client);
         }
@@ -50,10 +57,6 @@ public class SshApp(string host, int port, string username, string password, str
         }
 
         Console.WriteLine("✓ Successfully connected to SSH server!");
-
-        // string description = $"read current working directory";
-        // var ok = Execute(client, "pwd", description);
-        // if (!ok) return;
         
         var description = "create remote .ssh directory if it doesn't exist...";
         var commandText = "mkdir -p ~/.ssh";
@@ -105,7 +108,7 @@ public class SshApp(string host, int port, string username, string password, str
         return false;
     }
 
-    private SshClient ComposeSshClient()
+    private SshClient ComposeSshClientWithPassword()
     {
         var method = new PasswordAuthenticationMethod(username, password);
         var connectionInfo = new ConnectionInfo(host, port, username, method);
