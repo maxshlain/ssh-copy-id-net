@@ -84,7 +84,7 @@ public class SshApp(string host, int port, string username, string password, str
 
         if (command.ExitStatus == 0)
         {
-            string message = $" Successfully {description}";
+            string message = $"✓ Successfully {description}";
             string stdout = result?.Trim() ?? string.Empty;
             if (!string.IsNullOrEmpty(stdout))
             {
@@ -95,7 +95,7 @@ public class SshApp(string host, int port, string username, string password, str
             return true;
         }
 
-        string errorMessage = $"Command '{commandText}' failed with exit code {command.ExitStatus}.";
+        string errorMessage = $"✗ Failed to {description}";
         if (!string.IsNullOrEmpty(command.Error))
         {
             errorMessage += $"\nError: {command.Error.Trim()}";
