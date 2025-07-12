@@ -51,8 +51,8 @@ Check the [Releases](../../releases) page for pre-built binaries for your platfo
 Create a standalone executable that doesn't require .NET runtime:
 
 ```bash
-chmod +x publish.mac.bash
-./publish.mac.bash
+chmod +x publish/mac.bash
+./publish/mac.bash
 ```
 
 The executable will be available in the `dist/macos` directory with separate builds for Intel (`osx-x64`) and Apple Silicon (`osx-arm64`) Macs.
@@ -61,8 +61,8 @@ The executable will be available in the `dist/macos` directory with separate bui
 Create a standalone executable for Windows:
 
 ```bash
-chmod +x publish.win.bash
-./publish.win.bash
+chmod +x publish/win.bash
+./publish/win.bash
 ```
 
 The executable will be available in the `dist/windows` directory with separate builds for 64-bit (`win-x64`) and ARM64 (`win-arm64`) Windows systems.
@@ -149,8 +149,9 @@ The application provides detailed error messages for common issues:
 ```
 ├── LICENSE                  # MIT license file
 ├── README.md               # This file
-├── publish.mac.bash        # macOS standalone build script
-├── publish.win.bash        # Windows standalone build script
+├── publish/                # Build scripts directory
+│   ├── mac.bash            # macOS standalone build script
+│   └── win.bash            # Windows standalone build script
 └── src/
     └── app/
         ├── app.csproj           # Project file with dependencies
