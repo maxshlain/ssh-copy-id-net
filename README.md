@@ -376,7 +376,6 @@ This project uses GitHub Actions to automatically build and release cross-platfo
 - Cross-platform compilation from single Ubuntu runner
 - Self-contained executables (no .NET runtime required)
 - Single-file deployment
-- Trimmed binaries for smaller size
 - Consistent build environment across all platforms
 
 ### Manual Building

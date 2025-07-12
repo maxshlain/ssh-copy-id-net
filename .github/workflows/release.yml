@@ -80,7 +80,6 @@ jobs:
             --self-contained true \
             --output ./dist/${{ matrix.os }}/${{ matrix.runtime }} \
             /p:PublishSingleFile=true \
-            /p:PublishTrimmed=true \
             /p:IncludeNativeLibrariesForSelfExtract=true
 
       - name: Rename executable
