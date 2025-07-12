@@ -48,6 +48,41 @@ sudo mv ssh-copy-id-net /usr/local/bin/
 # Extract ssh-copy-id-net.exe from the downloaded .zip file
 ```
 
+#### macOS-Specific Setup
+
+When downloading pre-built binaries from GitHub releases on macOS, you may encounter security restrictions due to Apple's Gatekeeper. Follow these steps to properly set up the executable:
+
+**1. Extract and sign the binary:**
+```bash
+# Extract the downloaded archive
+tar -xzf ssh-copy-id-net-*-osx-*.tar.gz
+
+# Remove quarantine attribute (required for downloaded files)
+xattr -d com.apple.quarantine ssh-copy-id-net
+
+# Sign the binary to satisfy macOS security requirements
+codesign --force --deep --sign - ssh-copy-id-net
+
+# Make the binary executable
+chmod +x ssh-copy-id-net
+
+# Optional: Move to a directory in your PATH for system-wide access
+sudo mv ssh-copy-id-net /usr/local/bin/
+```
+
+**2. Alternative: If you encounter "cannot be opened because it is from an unidentified developer":**
+```bash
+# Remove quarantine and sign in one step
+xattr -d com.apple.quarantine ssh-copy-id-net && codesign --force --deep --sign - ssh-copy-id-net
+```
+
+**Why these steps are needed:**
+- **Quarantine removal**: macOS automatically marks files downloaded from the internet with a quarantine attribute
+- **Code signing**: Signing with an ad-hoc signature (`-`) satisfies macOS's requirement for executable code to be signed
+- **Without these steps**: macOS will prevent the binary from running and show security warnings
+
+**Note:** These steps are only required for binaries downloaded from GitHub releases. If you build from source locally, these security restrictions don't apply.
+
 ### Option 2: Build from Source
 
 1. Clone the repository:
