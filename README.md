@@ -47,25 +47,74 @@ Check the [Releases](../../releases) page for pre-built binaries for your platfo
 
 ### Option 3: Create Standalone Executable
 
-#### For macOS
-Create a standalone executable that doesn't require .NET runtime:
+#### Quick Start
 
-```bash
-chmod +x publish/mac.bash
-./publish/mac.bash
+For most users, the easiest approach is to use the cross-platform PowerShell script:
+
+```powershell
+# Build for all platforms
+./publish/publish-all.ps1 -All
+
+# Build for specific platforms
+./publish/publish-all.ps1 -Windows -MacOS
+
+# Get help
+./publish/publish-all.ps1 -Help
 ```
 
-The executable will be available in the `dist/macos` directory with separate builds for Intel (`osx-x64`) and Apple Silicon (`osx-arm64`) Macs.
+#### Platform-Specific Scripts
 
-#### For Windows
-Create a standalone executable for Windows:
-
+**For macOS/Linux Developers (using Bash):**
 ```bash
-chmod +x publish/win.bash
+# Build for macOS
+chmod +x publish/mac.bash
+./publish/mac.bash
+
+# Build for Windows
+chmod +x publish/win.bash  
 ./publish/win.bash
 ```
 
-The executable will be available in the `dist/windows` directory with separate builds for 64-bit (`win-x64`) and ARM64 (`win-arm64`) Windows systems.
+**For Windows Developers (using PowerShell):**
+```powershell
+# Build for Windows
+.\publish\win.ps1
+
+# Build for macOS
+.\publish\mac.ps1
+
+# Build for all platforms
+.\publish\publish-all.ps1 -All
+```
+
+**For Cross-Platform (using PowerShell Core):**
+```powershell
+# Available on all platforms - build for any target
+./publish/mac.ps1      # macOS executables
+./publish/win.ps1      # Windows executables
+./publish/publish-all.ps1 -Linux  # Linux executables
+```
+
+#### Output Locations
+
+All build scripts create executables in the `dist/` directory:
+- **Windows**: `dist/windows/win-x64/app.exe`, `dist/windows/win-arm64/app.exe`
+- **macOS**: `dist/macos/osx-x64/app`, `dist/macos/osx-arm64/app` 
+- **Linux**: `dist/linux/linux-x64/app`, `dist/linux/linux-arm64/app`
+
+#### Runtime Identification
+
+**Windows:**
+- **x64**: Most common Windows PCs and servers
+- **ARM64**: Surface Pro X, newer ARM-based Windows devices
+
+**macOS:**
+- **x64**: Intel-based Macs (2020 and earlier)
+- **ARM64**: Apple Silicon Macs (M1, M2, M3, etc.)
+
+**Linux:**
+- **x64**: Most Linux servers and desktops  
+- **ARM64**: ARM-based Linux systems, Raspberry Pi 4+
 
 ## Usage
 
@@ -150,8 +199,12 @@ The application provides detailed error messages for common issues:
 ├── LICENSE                  # MIT license file
 ├── README.md               # This file
 ├── publish/                # Build scripts directory
-│   ├── mac.bash            # macOS standalone build script
-│   └── win.bash            # Windows standalone build script
+│   ├── mac.bash            # macOS standalone build script (Bash)
+│   ├── win.bash            # Windows standalone build script (Bash)
+│   ├── mac.ps1             # macOS standalone build script (PowerShell)
+│   ├── win.ps1             # Windows standalone build script (PowerShell)
+│   ├── publish-all.ps1     # Cross-platform build script with flexible options
+│   └── README.md           # Publishing documentation
 └── src/
     └── app/
         ├── app.csproj           # Project file with dependencies
@@ -161,6 +214,36 @@ The application provides detailed error messages for common issues:
         ├── ConnectionTester.cs  # SSH connection validation
         └── SshConnectionArgs.cs # Connection parameters model
 ```
+
+## Publishing Scripts
+
+The `publish/` directory contains multiple build scripts to create standalone executables:
+
+### Available Scripts
+
+- **Bash Scripts** (macOS/Linux): `mac.bash`, `win.bash`
+- **PowerShell Scripts** (Cross-platform): `mac.ps1`, `win.ps1`, `publish-all.ps1`
+
+### Script Features
+
+All scripts provide:
+- ✅ Error handling and validation
+- 🧹 Automatic cleanup of previous builds
+- 📁 File size reporting
+- 🎯 Single-file executable generation
+- 📋 Clear usage instructions
+- 💡 Architecture detection guidance
+
+The PowerShell scripts additionally offer:
+- 🎨 Colored output for better readability
+- 🔧 Cross-platform compatibility  
+- ⚙️ Flexible build options (`publish-all.ps1`)
+- 📊 Build summary reporting
+
+### Prerequisites for Building
+
+- .NET 8.0 SDK installed
+- PowerShell Core (for .ps1 scripts) - included with Windows, available for macOS/Linux
 
 ## Contributing
 
