@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace app;
 
 public class ArgumentsParser
@@ -57,6 +59,11 @@ public class ArgumentsParser
 
     private static void ShowUsage()
     {
+        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
+        
+        Console.WriteLine($"ssh-copy-id-net v{version}");
+        Console.WriteLine("A .NET cross-platform implementation of ssh-copy-id utility");
+        Console.WriteLine();
         Console.WriteLine("Usage: app <host> <port> <username> <password> <public_key_file>");
         Console.WriteLine();
         Console.WriteLine("Parameters:");
