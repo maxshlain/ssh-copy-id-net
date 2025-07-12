@@ -378,6 +378,21 @@ This project uses GitHub Actions to automatically build and release cross-platfo
 - Single-file deployment
 - Consistent build environment across all platforms
 
+### Creating a New Release
+
+To create a new release with version tag v0.1.5 and a custom message:
+
+1. **Create the tag with a message:**
+   ```bash
+   git tag -a v0.1.5 -m "message"
+   ```
+
+2. **Push the tag to trigger the release:**
+   ```bash
+   git push origin v0.1.5
+   ```
+
+
 ### Manual Building
 
 For development or custom builds, you can still use the PowerShell scripts in the `publish/` directory:
