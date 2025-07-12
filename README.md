@@ -45,16 +45,27 @@ Check the [Releases](../../releases) page for pre-built binaries for your platfo
    dotnet run -- <host> <port> <username> <password> <public_key_file>
    ```
 
-### Option 3: Create Standalone Executable (macOS)
+### Option 3: Create Standalone Executable
 
-For macOS users, you can create a standalone executable that doesn't require .NET runtime:
+#### For macOS
+Create a standalone executable that doesn't require .NET runtime:
 
 ```bash
 chmod +x publish.mac.bash
 ./publish.mac.bash
 ```
 
-The executable will be available in the `dist/macos` directory.
+The executable will be available in the `dist/macos` directory with separate builds for Intel (`osx-x64`) and Apple Silicon (`osx-arm64`) Macs.
+
+#### For Windows
+Create a standalone executable for Windows:
+
+```bash
+chmod +x publish.win.bash
+./publish.win.bash
+```
+
+The executable will be available in the `dist/windows` directory with separate builds for 64-bit (`win-x64`) and ARM64 (`win-arm64`) Windows systems.
 
 ## Usage
 
@@ -81,6 +92,9 @@ app 192.168.1.100 2222 deploy mypass /home/user/.ssh/deploy_key.pub
 
 # Copy key to localhost for testing
 app 127.0.0.1 22 admin password /Users/admin/.ssh/id_ed25519.pub
+
+# Windows example (using .exe extension)
+app.exe example.com 22 user secretpass C:\Users\user\.ssh\id_rsa.pub
 ```
 
 ## How It Works
@@ -133,14 +147,18 @@ The application provides detailed error messages for common issues:
 ## Project Structure
 
 ```
-src/
-├── app/
-│   ├── app.csproj           # Project file with dependencies
-│   ├── Program.cs           # Application entry point
-│   ├── SshApp.cs           # Main SSH operations logic
-│   ├── ArgumentsParser.cs   # Command-line argument parsing
-│   ├── ConnectionTester.cs  # SSH connection validation
-│   └── SshConnectionArgs.cs # Connection parameters model
+├── LICENSE                  # MIT license file
+├── README.md               # This file
+├── publish.mac.bash        # macOS standalone build script
+├── publish.win.bash        # Windows standalone build script
+└── src/
+    └── app/
+        ├── app.csproj           # Project file with dependencies
+        ├── Program.cs           # Application entry point
+        ├── SshApp.cs           # Main SSH operations logic
+        ├── ArgumentsParser.cs   # Command-line argument parsing
+        ├── ConnectionTester.cs  # SSH connection validation
+        └── SshConnectionArgs.cs # Connection parameters model
 ```
 
 ## Contributing
@@ -182,3 +200,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Check if the SSH server allows key-based authentication
 - Verify `PubkeyAuthentication yes` is set in `/etc/ssh/sshd_config`
 - Ensure the user's home directory permissions are correct
+
+### Platform-Specific Notes
+
+**Windows Users:**
+- Use backslashes (`\`) in file paths or escape forward slashes
+- SSH client must be available (install OpenSSH or use Git Bash/WSL)
+- When using Windows paths, enclose in quotes if they contain spaces
+- Example: `app.exe example.com 22 user pass "C:\Users\My User\.ssh\id_rsa.pub"`
+
+**macOS/Linux Users:**
+- Standard Unix file paths with forward slashes work as expected
+- Ensure the executable has proper permissions (`chmod +x app`)
