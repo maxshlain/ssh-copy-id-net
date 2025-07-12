@@ -30,15 +30,24 @@ public class SshApp(string host, int port, string username, string password, str
         }
     }
 
+    private string PrintBanner()
+    {
+        return @$"
+    You can connect to your server with
+        ssh -p {port} {username}@{host}
+";
+    }
+
     private void RunImpl()
     {
         var tester = new ConnectionTester(host, port, username);
         if (tester.CanLoginWithAnyInstalledKey())
         {
             Console.WriteLine("✓ SSH server is reachable with key-based authentication.");
+            Console.WriteLine(PrintBanner());
             return;
         }
-        
+
         using (SshClient client = ComposeSshClientWithPassword())
         {
             RunWithClient(client);
@@ -57,27 +66,28 @@ public class SshApp(string host, int port, string username, string password, str
         }
 
         Console.WriteLine("✓ Successfully connected to SSH server!");
-        
+
         var description = "create remote .ssh directory if it doesn't exist...";
         var commandText = "mkdir -p ~/.ssh";
         var ok = Execute(client, commandText, description);
         if (!ok) return;
-        
+
         description = "set correct permissions for .ssh directory...";
         commandText = "chmod 700 ~/.ssh";
         ok = Execute(client, commandText, description);
         if (!ok) return;
-        
+
         description = "copy public key to remote .ssh directory...\"";
         string publicKeyContent = File.ReadAllText(publicKeyFile).Trim();
         commandText = $"echo \"{publicKeyContent}\" >> ~/.ssh/authorized_keys";
         ok = Execute(client, commandText, description);
         if (!ok) return;
-        
+
         description = "set correct permissions for authorized_keys file...";
         commandText = "chmod 600 ~/.ssh/authorized_keys";
         ok = Execute(client, commandText, description);
         if (!ok) return;
+        Console.WriteLine(PrintBanner());
     }
 
     private static bool Execute(SshClient client, string commandText, string description)
