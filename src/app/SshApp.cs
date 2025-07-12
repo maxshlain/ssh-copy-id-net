@@ -45,22 +45,32 @@ public class SshApp(string host, int port, string username, string password)
 
             Console.WriteLine("✓ Successfully connected to SSH server!");
 
-            var command = client.CreateCommand("pwd");
-            var result = command.Execute();
-
-            if (command.ExitStatus != 0)
+            var ok = Execute(client, "pwd");
+            if (!ok)
             {
-                Console.WriteLine($"Failed to execute 'pwd' command. Exit code: {command.ExitStatus}");
-                if (!string.IsNullOrEmpty(command.Error))
-                {
-                    Console.WriteLine($"Error: {command.Error}");
-                }
-
                 return;
             }
-
-            Console.WriteLine($"Current working directory: {result.Trim()}");
         }
+    }
+
+    private static bool Execute(SshClient client, string commandText)
+    {
+        SshCommand? command = client.CreateCommand(commandText);
+        string? result = command.Execute();
+
+        if (command.ExitStatus != 0)
+        {
+            Console.WriteLine($"Failed to execute 'pwd' command. Exit code: {command.ExitStatus}");
+            if (!string.IsNullOrEmpty(command.Error))
+            {
+                Console.WriteLine($"Error: {command.Error}");
+            }
+
+            return false;
+        }
+
+        Console.WriteLine($"Current working directory: {result.Trim()}");
+        return true;
     }
 
     private SshClient ComposeSshClient()
