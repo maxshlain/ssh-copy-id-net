@@ -6,6 +6,19 @@ A .NET cross-platform implementation of the `ssh-copy-id` utility for copying SS
 
 This tool automates the process of copying your SSH public key to a remote server's `~/.ssh/authorized_keys` file, enabling passwordless SSH authentication. It's particularly useful when the standard `ssh-copy-id` utility is not available or when you need a cross-platform solution.
 
+## Why
+
+When working with newly created servers from macOS or Linux, developers can easily combine `sshpass` with `ssh-copy-id` commands to quickly setup key-based authentication. This workflow is perfect for automation and scripting:
+
+```bash
+# Easy setup on Unix-like systems
+sshpass -p 'password' ssh-copy-id user@server.com
+```
+
+However, doing the same on Windows is impossible because there is no native `ssh-copy-id` utility for Windows. This creates a significant gap in cross-platform development workflows and server provisioning scripts.
+
+**This tool is designed to fill that gap**, providing a unified, cross-platform solution that works identically on Windows, macOS, and Linux. Now you can use the same automation scripts across all platforms without worrying about OS-specific SSH utilities.
+
 ## Features
 
 - ✅ **Cross-platform**: Works on Windows, macOS, and Linux
