@@ -10,11 +10,28 @@ echo "📦 Building Debian packages for ssh-copy-id-net..."
 
 # Define variables
 PROJECT_PATH="src/app/app.csproj"
-VERSION="1.0.0"  # You can extract this from the project file or pass as parameter
 PACKAGE_NAME="ssh-copy-id-net"
 MAINTAINER="maxshlain <maxshlain@users.noreply.github.com>"
 DESCRIPTION="A .NET cross-platform implementation of ssh-copy-id utility"
 HOMEPAGE="https://github.com/maxshlain/ssh-copy-id-net"
+
+# Function to extract version from csproj file
+get_app_version() {
+    if [ -f "$PROJECT_PATH" ]; then
+        # Extract version using grep and sed
+        version=$(grep '<Version>' "$PROJECT_PATH" | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/' | tr -d ' ')
+        if [ -n "$version" ]; then
+            echo "$version"
+        else
+            echo "1.0.0"  # Default fallback
+        fi
+    else
+        echo "1.0.0"  # Default fallback
+    fi
+}
+
+VERSION=$(get_app_version)
+echo "📋 Application Version: $VERSION"
 
 # Architecture mappings
 declare -A ARCH_MAP

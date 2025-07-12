@@ -14,6 +14,24 @@ OUTPUT_DIR="dist/linux"
 RUNTIME_ID="linux-x64"    # For 64-bit Linux
 RUNTIME_ID_ARM="linux-arm64"  # For ARM64 Linux (Raspberry Pi 4+, etc.)
 
+# Function to extract version from csproj file
+get_app_version() {
+    if [ -f "$PROJECT_PATH" ]; then
+        # Extract version using grep and sed
+        version=$(grep '<Version>' "$PROJECT_PATH" | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/' | tr -d ' ')
+        if [ -n "$version" ]; then
+            echo "$version"
+        else
+            echo "1.0.0"  # Default fallback
+        fi
+    else
+        echo "1.0.0"  # Default fallback
+    fi
+}
+
+APP_VERSION=$(get_app_version)
+echo "📋 Application Version: $APP_VERSION"
+
 # Clean previous builds
 echo "🧹 Cleaning previous builds..."
 if [ -d "$OUTPUT_DIR" ]; then
@@ -69,7 +87,7 @@ echo ""
 publish_for_runtime "$RUNTIME_ID_ARM"
 
 echo ""
-echo "🎉 Build complete!"
+echo "🎉 Build complete! (Version: $APP_VERSION)"
 echo ""
 echo "📋 Usage instructions:"
 echo "   64-bit Linux:  ./dist/linux/$RUNTIME_ID/app"

@@ -47,9 +47,35 @@ if ($All) {
 
 Write-Host "🚀 Building standalone executables..." -ForegroundColor Green
 
+# Function to extract version from csproj file
+function Get-AppVersion {
+    param([string]$ProjectPath)
+    
+    if (Test-Path $ProjectPath) {
+        try {
+            [xml]$projectXml = Get-Content $ProjectPath
+            $version = $projectXml.Project.PropertyGroup.Version
+            if ($version) {
+                return $version.Trim()
+            }
+        }
+        catch {
+            # Fallback to regex parsing if XML parsing fails
+            $content = Get-Content $ProjectPath -Raw
+            if ($content -match '<Version>(.*?)</Version>') {
+                return $matches[1].Trim()
+            }
+        }
+    }
+    return "1.0.0"  # Default fallback
+}
+
 # Define variables
 $PROJECT_PATH = "src/app/app.csproj"
 $BASE_OUTPUT_DIR = "dist"
+$APP_VERSION = Get-AppVersion -ProjectPath $PROJECT_PATH
+
+Write-Host "📋 Application Version: $APP_VERSION" -ForegroundColor Cyan
 
 # Runtime identifiers
 $WindowsRuntimes = @("win-x64", "win-arm64")
@@ -174,7 +200,7 @@ if ($Linux) {
 }
 
 Write-Host ""
-Write-Host "🎉 Build process complete!" -ForegroundColor Green
+Write-Host "🎉 Build process complete! (Version: $APP_VERSION)" -ForegroundColor Green
 Write-Host "📊 Built $SuccessfulBuilds out of $TotalBuilds targets successfully" -ForegroundColor Cyan
 
 if ($SuccessfulBuilds -gt 0) {

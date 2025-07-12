@@ -14,6 +14,30 @@ $OUTPUT_DIR = "dist/macos"
 $RUNTIME_ID = "osx-x64"      # For Intel Macs
 $RUNTIME_ID_ARM = "osx-arm64" # For Apple Silicon Macs
 
+# Function to extract version from csproj file
+function Get-AppVersion {
+    if (Test-Path $PROJECT_PATH) {
+        try {
+            [xml]$projectXml = Get-Content $PROJECT_PATH
+            $version = $projectXml.Project.PropertyGroup.Version
+            if ($version) {
+                return $version.Trim()
+            }
+        }
+        catch {
+            # Fallback to regex parsing if XML parsing fails
+            $content = Get-Content $PROJECT_PATH -Raw
+            if ($content -match '<Version>(.*?)</Version>') {
+                return $matches[1].Trim()
+            }
+        }
+    }
+    return "1.0.0"  # Default fallback
+}
+
+$APP_VERSION = Get-AppVersion
+Write-Host "📋 Application Version: $APP_VERSION" -ForegroundColor Cyan
+
 # Clean previous builds
 Write-Host "🧹 Cleaning previous builds..." -ForegroundColor Yellow
 if (Test-Path $OUTPUT_DIR) {
@@ -84,7 +108,7 @@ Write-Host ""
 Publish-ForRuntime -Runtime $RUNTIME_ID_ARM
 
 Write-Host ""
-Write-Host "🎉 Build complete!" -ForegroundColor Green
+Write-Host "🎉 Build complete! (Version: $APP_VERSION)" -ForegroundColor Green
 Write-Host ""
 Write-Host "📋 Usage instructions:" -ForegroundColor White
 Write-Host "   Intel Macs:      ./dist/macos/$RUNTIME_ID/app" -ForegroundColor Gray

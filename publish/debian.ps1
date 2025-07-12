@@ -10,11 +10,34 @@ Write-Host "📦 Building Debian packages for ssh-copy-id-net..." -ForegroundCol
 
 # Define variables
 $PROJECT_PATH = "src/app/app.csproj"
-$VERSION = "1.0.0"  # You can extract this from the project file or pass as parameter
 $PACKAGE_NAME = "ssh-copy-id-net"
 $MAINTAINER = "maxshlain <maxshlain@users.noreply.github.com>"
 $DESCRIPTION = "A .NET cross-platform implementation of ssh-copy-id utility"
 $HOMEPAGE = "https://github.com/maxshlain/ssh-copy-id-net"
+
+# Function to extract version from csproj file
+function Get-AppVersion {
+    if (Test-Path $PROJECT_PATH) {
+        try {
+            [xml]$projectXml = Get-Content $PROJECT_PATH
+            $version = $projectXml.Project.PropertyGroup.Version
+            if ($version) {
+                return $version.Trim()
+            }
+        }
+        catch {
+            # Fallback to regex parsing if XML parsing fails
+            $content = Get-Content $PROJECT_PATH -Raw
+            if ($content -match '<Version>(.*?)</Version>') {
+                return $matches[1].Trim()
+            }
+        }
+    }
+    return "1.0.0"  # Default fallback
+}
+
+$VERSION = Get-AppVersion
+Write-Host "📋 Application Version: $VERSION" -ForegroundColor Cyan
 
 # Architecture mappings
 $ArchMap = @{
