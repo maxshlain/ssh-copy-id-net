@@ -81,7 +81,11 @@ jobs:
 
       - name: Rename executable
         run: |
-          mv ./dist/${{ matrix.os }}/${{ matrix.runtime }}/app ./dist/${{ matrix.os }}/${{ matrix.runtime }}/${{ matrix.executable_name }}
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            mv ./dist/${{ matrix.os }}/${{ matrix.runtime }}/app.exe ./dist/${{ matrix.os }}/${{ matrix.runtime }}/${{ matrix.executable_name }}
+          else
+            mv ./dist/${{ matrix.os }}/${{ matrix.runtime }}/app ./dist/${{ matrix.os }}/${{ matrix.runtime }}/${{ matrix.executable_name }}
+          fi
 
       - name: Create archive
         run: |
