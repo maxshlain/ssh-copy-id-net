@@ -38,7 +38,7 @@ public class SshApp(string host, int port, string username, string password, str
         }
     }
 
-    private static void RunWithClient(SshClient client)
+    private void RunWithClient(SshClient client)
     {
         Console.WriteLine("Connecting to SSH server...");
         client.Connect();
@@ -52,6 +52,24 @@ public class SshApp(string host, int port, string username, string password, str
         Console.WriteLine("✓ Successfully connected to SSH server!");
 
         var ok = Execute(client, "pwd");
+        if (!ok) return;
+        
+        // create remote .ssh directory if it doesn't exist
+        ok = Execute(client, "mkdir -p ~/.ssh");
+        if (!ok) return;
+        
+        // make sure remote .ssh directory has correct permissions
+        ok = Execute(client, "chmod 700 ~/.ssh");
+        if (!ok) return;
+        
+        // copy public key to remote .ssh directory
+        string publicKeyContent = File.ReadAllText(publicKeyFile).Trim();
+        string commandText = $"echo \"{publicKeyContent}\" >> ~/.ssh/authorized_keys";
+        ok = Execute(client, commandText);
+        if (!ok) return;
+        
+        // set correct permissions for authorized_keys file
+        ok = Execute(client, "chmod 600 ~/.ssh/authorized_keys");
         if (!ok) return;
     }
 
