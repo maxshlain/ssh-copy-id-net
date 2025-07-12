@@ -46,10 +46,7 @@ public class SshApp(string host, int port, string username, string password)
             Console.WriteLine("✓ Successfully connected to SSH server!");
 
             var ok = Execute(client, "pwd");
-            if (!ok)
-            {
-                return;
-            }
+            if (!ok) return;
         }
     }
 
@@ -58,19 +55,21 @@ public class SshApp(string host, int port, string username, string password)
         SshCommand? command = client.CreateCommand(commandText);
         string? result = command.Execute();
 
-        if (command.ExitStatus != 0)
+        if (command.ExitStatus == 0)
         {
-            Console.WriteLine($"Failed to execute 'pwd' command. Exit code: {command.ExitStatus}");
-            if (!string.IsNullOrEmpty(command.Error))
-            {
-                Console.WriteLine($"Error: {command.Error}");
-            }
-
-            return false;
+            string message = "Command executed successfully:\n\t" + result.Trim();
+            Console.WriteLine(message);
+            return true;
         }
 
-        Console.WriteLine($"Current working directory: {result.Trim()}");
-        return true;
+        string errorMessage = $"Command '{commandText}' failed with exit code {command.ExitStatus}.";
+        if (!string.IsNullOrEmpty(command.Error))
+        {
+            errorMessage += $"\nError: {command.Error.Trim()}";
+        }
+        
+        Console.WriteLine(errorMessage);
+        return false;
     }
 
     private SshClient ComposeSshClient()
