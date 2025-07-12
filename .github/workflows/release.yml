@@ -7,44 +7,44 @@ on:
 
 jobs:
   build:
-    name: Build for ${{ matrix.os }} (${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
+    name: Cross-platform Build
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
           # Windows builds
           - os: windows
             arch: x64
-            runner: windows-latest
             runtime: win-x64
             executable_name: ssh-copy-id-net.exe
+            archive_format: zip
           - os: windows
             arch: arm64
-            runner: windows-latest
             runtime: win-arm64
             executable_name: ssh-copy-id-net.exe
+            archive_format: zip
           # macOS builds
           - os: macos
             arch: x64
-            runner: macos-latest
             runtime: osx-x64
             executable_name: ssh-copy-id-net
+            archive_format: tar.gz
           - os: macos
             arch: arm64
-            runner: macos-latest
             runtime: osx-arm64
             executable_name: ssh-copy-id-net
+            archive_format: tar.gz
           # Linux builds
           - os: linux
             arch: x64
-            runner: ubuntu-latest
             runtime: linux-x64
             executable_name: ssh-copy-id-net
+            archive_format: tar.gz
           - os: linux
             arch: arm64
-            runner: ubuntu-latest
             runtime: linux-arm64
             executable_name: ssh-copy-id-net
+            archive_format: tar.gz
 
     steps:
       - name: Checkout code
@@ -58,23 +58,12 @@ jobs:
       - name: Extract version from tag
         id: version
         run: |
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            VERSION=${GITHUB_REF#refs/tags/v}
-            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          else
-            VERSION=${GITHUB_REF#refs/tags/v}
-            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          fi
-        shell: bash
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Update project version
         run: |
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.version.outputs.VERSION }}<\/Version>/" src/app/app.csproj
-          else
-            sed -i.bak "s/<Version>.*<\/Version>/<Version>${{ steps.version.outputs.VERSION }}<\/Version>/" src/app/app.csproj
-          fi
-        shell: bash
+          sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.version.outputs.VERSION }}<\/Version>/" src/app/app.csproj
 
       - name: Restore dependencies
         run: dotnet restore src/app/app.csproj
@@ -90,26 +79,18 @@ jobs:
             /p:PublishTrimmed=true \
             /p:IncludeNativeLibrariesForSelfExtract=true
 
-      - name: Rename executable (non-Windows)
-        if: matrix.os != 'windows'
+      - name: Rename executable
         run: |
           mv ./dist/${{ matrix.os }}/${{ matrix.runtime }}/app ./dist/${{ matrix.os }}/${{ matrix.runtime }}/${{ matrix.executable_name }}
-
-      - name: Rename executable (Windows)
-        if: matrix.os == 'windows'
-        run: |
-          Move-Item -Path "./dist/${{ matrix.os }}/${{ matrix.runtime }}/app.exe" -Destination "./dist/${{ matrix.os }}/${{ matrix.runtime }}/${{ matrix.executable_name }}"
-        shell: powershell
 
       - name: Create archive
         run: |
           cd ./dist/${{ matrix.os }}/${{ matrix.runtime }}
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            7z a ../../../ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-${{ matrix.runtime }}.zip ./*
+          if [ "${{ matrix.archive_format }}" = "zip" ]; then
+            zip -r ../../../ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-${{ matrix.runtime }}.zip ./*
           else
             tar -czf ../../../ssh-copy-id-net-${{ steps.version.outputs.VERSION }}-${{ matrix.runtime }}.tar.gz ./*
           fi
-        shell: bash
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

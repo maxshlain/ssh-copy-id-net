@@ -356,13 +356,13 @@ The Debian package provides:
 
 ### Automated Releases
 
-This project uses GitHub Actions to automatically build and release cross-platform binaries whenever a new version tag is pushed.
+This project uses GitHub Actions to automatically build and release cross-platform binaries whenever a new version tag is pushed. All builds are performed on a single Ubuntu runner using .NET's excellent cross-compilation capabilities.
 
 **Release Process:**
 1. Tag a new version: `git tag v1.2.3`
 2. Push the tag: `git push origin v1.2.3`
 3. GitHub Actions will automatically:
-   - Build binaries for all supported platforms
+   - Cross-compile binaries for all supported platforms from Ubuntu
    - Create release archives (.zip for Windows, .tar.gz for macOS/Linux)
    - Create a GitHub release with all artifacts
    - Generate release notes with download links
@@ -373,10 +373,11 @@ This project uses GitHub Actions to automatically build and release cross-platfo
 - **Linux**: linux-x64, linux-arm64
 
 **Build Features:**
+- Cross-platform compilation from single Ubuntu runner
 - Self-contained executables (no .NET runtime required)
 - Single-file deployment
 - Trimmed binaries for smaller size
-- Cross-platform compatibility
+- Consistent build environment across all platforms
 
 ### Manual Building
 
