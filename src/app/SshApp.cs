@@ -34,20 +34,25 @@ public class SshApp(string host, int port, string username, string password)
     {
         using (SshClient client = ComposeSshClient())
         {
-            Console.WriteLine("Connecting to SSH server...");
-            client.Connect();
-
-            if (!client.IsConnected)
-            {
-                Console.WriteLine("✗ Failed to connect to SSH server.");
-                return;
-            }
-
-            Console.WriteLine("✓ Successfully connected to SSH server!");
-
-            var ok = Execute(client, "pwd");
-            if (!ok) return;
+            RunWithClient(client);
         }
+    }
+
+    private static void RunWithClient(SshClient client)
+    {
+        Console.WriteLine("Connecting to SSH server...");
+        client.Connect();
+
+        if (!client.IsConnected)
+        {
+            Console.WriteLine("✗ Failed to connect to SSH server.");
+            return;
+        }
+
+        Console.WriteLine("✓ Successfully connected to SSH server!");
+
+        var ok = Execute(client, "pwd");
+        if (!ok) return;
     }
 
     private static bool Execute(SshClient client, string commandText)
