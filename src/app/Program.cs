@@ -5,5 +5,12 @@
 using app;
 
 SshConnectionArgs connectionArgs = ArgumentsParser.Parse(args);
-SshApp app = new SshApp(connectionArgs.Host, connectionArgs.Port, connectionArgs.Username, connectionArgs.Password);
-app.RunAsync();
+
+SshApp app = new SshApp(
+    host: connectionArgs.Host,
+    port: connectionArgs.Port,
+    username: connectionArgs.Username,
+    password: connectionArgs.Password
+);
+
+app.Run();
